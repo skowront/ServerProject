@@ -10,3 +10,4 @@
 #include "utilities.h"
 #include <crtdbg.h>
 #include <sstream>
+#include <list>

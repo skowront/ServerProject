@@ -73,7 +73,7 @@ void Server::create_set()
 {
 	// Create the master file descriptor set and zero it
 	
-	//master.clear(); 
+	clients.clear(); 
 	FD_ZERO(&master);
 	
 
@@ -81,8 +81,8 @@ void Server::create_set()
 	// It's important that this socket is added for our server or else we won't 'hear' incoming
 	// connections 
 	
-
-	//master.push_back(listening_socket); 
+	UserSocket us; us.fd_index = 0; us.id = 0; us.ip = "";
+	clients.push_back(us);
 	FD_SET(listening_socket, &master);
 	 
 	// this will be changed by the \quit command (see below, bonus not in video!)
@@ -91,6 +91,7 @@ void Server::create_set()
 
 void Server::handlingloop()
 {
+	
 	bool running = true;
 	while (running)
 	{
@@ -109,22 +110,30 @@ void Server::handlingloop()
 		fd_set copy = master;
 
 		// See who's talking to us
-		//int socketCount = master.size(); 
+
 		int socketCount = select(0, &copy, nullptr, nullptr, nullptr);
+		
 		// Loop through all the current connections / potential connect
 		for (int i = 0; i < socketCount; i++)
 		{
 			// Makes things easy for us doing this assignment
-			//SOCKET sock = master[i]; 
 			SOCKET sock = copy.fd_array[i];
 			// Is it an inbound communication?
 			if (sock == listening_socket)
 			{
 				// Accept a new connection
 				SOCKET client = accept(listening_socket, nullptr, nullptr);
-				
+				if (client == INVALID_SOCKET) {
+					wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
+					closesocket(listening_socket);
+					WSACleanup();
+					return;
+				}
+				else
+					wprintf(L"Client connected.\n");
 				// Add the new connection to the list of connected clients
-				//master.push_back(client);
+				UserSocket us; us.fd_index = i; us.id = clients[clients.size()-1].id + 1; us.ip = "";
+				clients.push_back(us);
 				FD_SET(client, &master);
 				//TODO: create copy of socket list or common structure to hold em
 				//print("connected at: " + std::to_string(i));
@@ -145,8 +154,13 @@ void Server::handlingloop()
 				{
 					// Drop the client
 					closesocket(sock);
-					//master.erase(master.begin()+i);
 					FD_CLR(sock, &master);
+					clients.erase(clients.begin()+i);
+					for (int j = i; j < clients.size(); j++)//must decrement indexes
+					{
+						clients[j].fd_index--;
+					}
+					
 				}
 				else
 				{
@@ -155,7 +169,7 @@ void Server::handlingloop()
 					{
 						// Is the command quit? 
 						std::string cmd = std::string(buf, bytesIn);
-						if (cmd == "\\quit\r\n")
+						if (cmd == "\\quit")
 						{
 							running = false;
 							break;
@@ -190,7 +204,7 @@ void Server::clean()
 {
 	// Remove the listening socket from the master file descriptor set and close it
 	// to prevent anyone else trying to connect.
-	//master.erase(master.begin());
+	clients.erase(clients.begin());
 	FD_CLR(listening_socket, &master);
 	closesocket(listening_socket);
 
@@ -206,11 +220,10 @@ void Server::clean()
 		send(sock, msg.c_str(), msg.size() + 1, 0);
 
 		// Remove it from the master file list and close the socket
-		//master.erase(master.begin());
 		FD_CLR(sock, &master);
 		closesocket(sock);
 	}
-	//master.empty();
+	clients.clear();
 	// Cleanup winsock
 	WSACleanup();
 

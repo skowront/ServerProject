@@ -1,6 +1,13 @@
 #pragma once
 #include "pch.h"
 
+struct UserSocket
+{
+	int fd_index;
+	std::string ip;
+	int id;
+};
+
 class Server
 {
 private:
@@ -16,10 +23,11 @@ private:
 	//state
 	bool running = true;
 
+
+	//dodanie socketa do fd_set nie jest rownowazne z zapamietaniem adresu
 	//fd socket sets
 	fd_set master;
-	int socketCount;
-	//std::vector <SOCKET> master;
+	std::vector<UserSocket> clients;
 
 public:
 	//class methods 
