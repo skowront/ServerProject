@@ -65,20 +65,28 @@ bool Server::create_listening_socket()
 
 	// Tell Winsock the socket is for listening 
 	listen(listening_socket, SOMAXCONN);
+	
 	return true;
 }
 
 void Server::create_set()
 {
 	// Create the master file descriptor set and zero it
+	
+	//master.clear(); 
 	FD_ZERO(&master);
+	
 
 	// Add our first socket that we're interested in interacting with; the listening socket!
 	// It's important that this socket is added for our server or else we won't 'hear' incoming
 	// connections 
-	FD_SET(listening_socket, &master);
+	
 
+	//master.push_back(listening_socket); 
+	FD_SET(listening_socket, &master);
+	 
 	// this will be changed by the \quit command (see below, bonus not in video!)
+	
 }
 
 void Server::handlingloop()
@@ -101,22 +109,25 @@ void Server::handlingloop()
 		fd_set copy = master;
 
 		// See who's talking to us
+		//int socketCount = master.size(); 
 		int socketCount = select(0, &copy, nullptr, nullptr, nullptr);
-
 		// Loop through all the current connections / potential connect
 		for (int i = 0; i < socketCount; i++)
 		{
 			// Makes things easy for us doing this assignment
+			//SOCKET sock = master[i]; 
 			SOCKET sock = copy.fd_array[i];
-
 			// Is it an inbound communication?
 			if (sock == listening_socket)
 			{
 				// Accept a new connection
 				SOCKET client = accept(listening_socket, nullptr, nullptr);
-
+				
 				// Add the new connection to the list of connected clients
+				//master.push_back(client);
 				FD_SET(client, &master);
+				//TODO: create copy of socket list or common structure to hold em
+				//print("connected at: " + std::to_string(i));
 
 				// Send a welcome message to the connected client
 				std::string welcomeMsg = "Welcome to the Awesome Chat Server!\r\n";
@@ -124,6 +135,7 @@ void Server::handlingloop()
 			}
 			else // It's an inbound message
 			{
+
 				char buf[4096];
 				ZeroMemory(buf, 4096);
 
@@ -133,16 +145,17 @@ void Server::handlingloop()
 				{
 					// Drop the client
 					closesocket(sock);
+					//master.erase(master.begin()+i);
 					FD_CLR(sock, &master);
 				}
 				else
 				{
 					// Check to see if it's a command. \quit kills the server
-					if (true)
+					if (buf[0] == '\\')
 					{
 						// Is the command quit? 
 						std::string cmd = std::string(buf, bytesIn);
-						if (strcmp("\\quit\0",buf)==0)
+						if (cmd == "\\quit\r\n")
 						{
 							running = false;
 							break;
@@ -151,6 +164,7 @@ void Server::handlingloop()
 						// Unknown command
 						continue;
 					}
+
 
 					// Send message to other clients, and definiately NOT the listening socket
 
@@ -176,13 +190,14 @@ void Server::clean()
 {
 	// Remove the listening socket from the master file descriptor set and close it
 	// to prevent anyone else trying to connect.
+	//master.erase(master.begin());
 	FD_CLR(listening_socket, &master);
 	closesocket(listening_socket);
 
 	// Message to let users know what's happening.
 	std::string msg = "Server is shutting down. Goodbye\r\n";
 
-	while (master.fd_count > 0)
+	while (master.fd_count> 0)
 	{
 		// Get the socket number
 		SOCKET sock = master.fd_array[0];
@@ -191,10 +206,11 @@ void Server::clean()
 		send(sock, msg.c_str(), msg.size() + 1, 0);
 
 		// Remove it from the master file list and close the socket
+		//master.erase(master.begin());
 		FD_CLR(sock, &master);
 		closesocket(sock);
 	}
-
+	//master.empty();
 	// Cleanup winsock
 	WSACleanup();
 

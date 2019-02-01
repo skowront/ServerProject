@@ -19,6 +19,7 @@ private:
 	//fd socket sets
 	fd_set master;
 	int socketCount;
+	//std::vector <SOCKET> master;
 
 public:
 	//class methods 
