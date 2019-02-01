@@ -9,7 +9,7 @@ private:
 	WORD ver;
 	int wsOk;
 	SOCKET listening_socket;
-	sockaddr_in def_sock_adress;
+	sockaddr_in hint;
 	//ins
 	int base_port;
 
@@ -35,7 +35,7 @@ public:
 private:
 	//helping functions for publics
 	bool initialize_winsock();
-	bool create_listening_socket(int base_port);//expected 54000
+	bool create_listening_socket();//expected 54000
 	void create_set();
 	void handlingloop();
 	void clean();

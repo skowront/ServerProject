@@ -16,12 +16,12 @@ Server::Server(int _base_port)
 
 void Server::Run()
 {
-	ver = MAKEWORD(2, 2);
+
 	if (!initialize_winsock())
 	{
 		return;
 	}
-	if (!create_listening_socket(base_port))
+	if (!create_listening_socket())
 	{
 		return;
 	}
@@ -32,7 +32,7 @@ void Server::Run()
 
 bool Server::initialize_winsock()
 {
-
+	ver = MAKEWORD(2, 2);
 	wsOk = WSAStartup(ver, &wsData);
 	if (wsOk != 0)
 	{
@@ -45,7 +45,7 @@ bool Server::initialize_winsock()
 	}
 }
 
-bool Server::create_listening_socket(int base_port)
+bool Server::create_listening_socket()
 {
 	//Create socket
 	listening_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -56,7 +56,7 @@ bool Server::create_listening_socket(int base_port)
 	}
 
 	// Bind the ip address and port to a socket
-	sockaddr_in hint;
+
 	hint.sin_family = AF_INET;
 	hint.sin_port = htons(base_port);
 	hint.sin_addr.S_un.S_addr = INADDR_ANY; // Could also use inet_pton .... 
@@ -138,11 +138,11 @@ void Server::handlingloop()
 				else
 				{
 					// Check to see if it's a command. \quit kills the server
-					if (buf[0] == '\\')
+					if (true)
 					{
 						// Is the command quit? 
 						std::string cmd = std::string(buf, bytesIn);
-						if (cmd == "\\quit")
+						if (strcmp("\\quit\0",buf)==0)
 						{
 							running = false;
 							break;
