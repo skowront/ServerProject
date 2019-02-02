@@ -11,7 +11,7 @@ private:
 	WSAData wsData;
 	WORD ver;
 	int wsOk;
-	SOCKET listening_socket;
+	SOCKET sock;
 	sockaddr_in hint;
 
 
@@ -26,9 +26,10 @@ public:
 private:
 	//help for publics
 	bool initialize_winsock();
-	bool create_listening_socket();
+	bool create_socket();
 	bool connectToServer();
 	void handlingloop();
 	void clean();
+
 };
 

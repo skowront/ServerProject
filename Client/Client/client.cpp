@@ -21,7 +21,7 @@ void Client::Run()
 	{
 		return;
 	}
-	if (!create_listening_socket())
+	if (!create_socket())
 	{
 		return;
 	}
@@ -45,74 +45,76 @@ bool Client::initialize_winsock()
 	}
 }
 
-bool Client::create_listening_socket()
+bool Client::create_socket()
 {
-	//Create socket
-	listening_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (listening_socket == INVALID_SOCKET)
+	// Create socket
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == INVALID_SOCKET)
 	{
-		print("Can't create a socket");
+		print("Can't create socket, Err #" + WSAGetLastError());
+		WSACleanup();
 		return false;
 	}
 
 	// Fill in a hint structure
-
 	hint.sin_family = AF_INET;
 	hint.sin_port = htons(base_port);
 	inet_pton(AF_INET, serverIpAdress.c_str(), &hint.sin_addr);
-
-	bind(listening_socket, (sockaddr*)&hint, sizeof(hint));
-
-	// Tell Winsock the socket is for listening 
-	listen(listening_socket, SOMAXCONN);
 	return true;
 }
 
-bool Client::connectToServer()
+bool Client::connectToServer()//error
 {
-	int connResult= connect(listening_socket, (sockaddr*)&hint, sizeof(hint));
+	int connResult= connect(sock, (sockaddr*)&hint, sizeof(hint));
 	if (connResult == SOCKET_ERROR)
 	{
 		print("Can't connect to server, Err #" + WSAGetLastError());
-		closesocket(listening_socket);
+		closesocket(sock);
 		WSACleanup();
 		return false;
 	}
 	return true;
 }
 
+
+
 void Client::handlingloop()
 {
 	char buf[4096];
 	std::string userInput;
+	std::string temp;
+	bool lineready = false;
 	do
 	{
 		// Prompt the user for some text
-		print("> ");
 		std::getline(std::cin, userInput);
 
 		if (userInput.size() > 0)		// Make sure the user has typed in something
 		{
 			// Send the text
-			int sendResult = send(listening_socket, userInput.c_str(), userInput.size() + 1, 0);
+			int sendResult = send(sock, userInput.c_str(), userInput.size() + 1, 0);
 			if (sendResult != SOCKET_ERROR)
 			{
 				// Wait for response
 				ZeroMemory(buf, 4096);
-				int bytesReceived = recv(listening_socket, buf, 4096, 0);
+				int bytesReceived = recv(sock, buf, 4096, 0);
 				if (bytesReceived > 0)
 				{
 					// Echo response to console
-					print( "SERVER> " + std::string(buf, 0, bytesReceived));
+					print("SERVER> " + std::string(buf, 0, bytesReceived));
 				}
 			}
 		}
 
 	} while (userInput.size() > 0);
+
+	// Gracefully close down everything
+	closesocket(sock);
+	WSACleanup();
 }
 
 void Client::clean()
 {
-	closesocket(listening_socket);
+	closesocket(sock);
 	WSACleanup();
 }
