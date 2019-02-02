@@ -162,9 +162,6 @@ void Client::handlingloop()
 
 	} while (userInput.size() > 0);
 
-	// Gracefully close down everything
-	closesocket(sock);
-	WSACleanup();
 }
 
 void Client::clean()
