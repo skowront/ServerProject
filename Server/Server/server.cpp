@@ -8,22 +8,23 @@ Server::Server()
 
 Server::~Server()
 {
-	/*if (dc_command1)
+	if (dc_command1 != nullptr)
 	{
 		free(dc_command1);
 	}
-	if (dc_command2)
+	if (dc_command2 != nullptr)
 	{
-		delete dc_command2;
-	}*/
+		free(dc_command2);
+	}
 }
 
 void Server::ServerBase()
 {
-	dc_command1 = new char[strlen("\\dc\n")];
-	dc_command2 = new char[strlen("\\dc\r\n")];
+	dc_command1 = (char*)malloc(sizeof(char)*sizeof("\\dc\n"));//alloc
+	dc_command2 = (char*)malloc(sizeof(char)*sizeof("\\dc\r\n"));//alloc
 	strcpy(dc_command1, "\\dc\n");
 	strcpy(dc_command2, "\\dc\r\n");
+	
 }
 
 Server::Server(int _base_port)
@@ -211,13 +212,14 @@ void Server::clean()
 {
 	// Remove the listening socket from the master file descriptor set and close it
 	// to prevent anyone else trying to connect.
+	delete clients[0];
 	clients.erase(clients.begin());
 	FD_CLR(listening_socket, &master);
 	closesocket(listening_socket);
 
 	// Message to let users know what's happening.
 	std::string msg = "Server is shutting down. Goodbye\r\n";
-
+	int i=0;
 	while (master.fd_count> 0)
 	{
 		// Get the socket number
@@ -229,8 +231,9 @@ void Server::clean()
 		// Remove it from the master file list and close the socket
 		FD_CLR(sock, &master);
 		closesocket(sock);
+		delete clients[0];
+		clients.erase(clients.begin());
 	}
-	clients.clear();
 	// Cleanup winsock
 	WSACleanup();
 

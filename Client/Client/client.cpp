@@ -6,7 +6,6 @@ Client::Client()
 
 Client::~Client()
 {
-	handle();
 	clean();
 }
 
@@ -16,76 +15,25 @@ Client::Client(std::string ip, int _port)
 	base_port = _port;
 }
 
-void Client::Run()
+bool Client::Run(double connectTimeout, bool unconditional)
 {
 
 	if (!initialize_winsock())
 	{
-		return;
+		//clean();
+		return false;
 	}
 	if (!create_socket())
 	{
-		return;
-	}
-	connectToServer();
-}
-
-std::string Client::RecieveMsg(bool wait_for_msg ,bool&msg_recieved,double timeout)
-{
-	std::clock_t start=std::clock();
-	double duration=0;
-	do
-	{
-		duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-		ZeroMemory(buf, 4096);
-		int   rc;
-		u_long nonblocking_enabled = TRUE;
-		ioctlsocket(sock, FIONBIO, &nonblocking_enabled);
-		errno = 0;
-		rc = recv(sock, buf, 4096, 0);
-		if (rc != NOERROR)
-		{
-			if (rc > 0)
-			{
-				msg_recieved = true;
-				std::string out(buf, 0, rc);
-				//for (int k = 0; k < out.length(); k++)
-				//{
-				//	bool oneenter = false;
-				//	if (out[k] == '\n')
-				//	{
-				//		if (oneenter)
-				//		{
-				//			out.erase(k);
-				//		}
-				//		oneenter = true;
-				//	}
-				//	if (out[k] == '\r')
-				//	{
-				//		out.erase(k);
-				//	}
-				//}
-				return out;
-				break;
-			}
-		}
-	} while (wait_for_msg&&duration<timeout);
-}
-
-bool Client::SendMsg(std::string msg)
-{
-	// Send the text
-	int sendResult;
-	sendResult = send(sock, msg.c_str(), msg.size() + 1, 0);
-	if (sendResult!=SOCKET_ERROR)
-	{
-		return true;
-	}
-	else
-	{
+		//clean();
 		return false;
 	}
-	return false;
+	if (!connectToServer(connectTimeout,unconditional))
+	{
+		//clean();
+		return false;
+	}
+	return true;	
 }
 
 bool Client::initialize_winsock()
@@ -121,28 +69,124 @@ bool Client::create_socket()
 	return true;
 }
 
-bool Client::connectToServer()//error
+bool Client::connectToServer(double connectTimeout,bool unconditional)//error
 {
-	int connResult= connect(sock, (sockaddr*)&hint, sizeof(hint));
-	if (connResult == SOCKET_ERROR)
+	if (unconditional)
 	{
-		print("Can't connect to server, Err #" + WSAGetLastError());
-		closesocket(sock);
-		WSACleanup();
-		return false;
+		int connResult = connect(sock, (sockaddr*)&hint, sizeof(hint));
+		if (connResult == SOCKET_ERROR)
+		{
+			int err = WSAGetLastError();
+			print("Can't connect to server, Err #" + WSAGetLastError());
+			closesocket(sock);
+			WSACleanup();
+			return false;
+		}
+		return true;
 	}
-	return true;
-}
+	else
+	{
+		TIMEVAL Timeout;
+		Timeout.tv_sec = connectTimeout;
+		Timeout.tv_usec = 0;
+		struct sockaddr_in address;  /* the libc network address data structure */
 
+			//set the socket in non-blocking
+		unsigned long iMode = 1;
+		int iResult = ioctlsocket(sock, FIONBIO, &iMode);
+		if (iResult != NO_ERROR)
+		{
+			printf("ioctlsocket failed with error: %ld\n", iResult);
+		}
 
+		if (connect(sock, (sockaddr*)&hint, sizeof(hint)) == false)
+		{
+			return false;
+		}
 
-void Client::handle()
-{
-	
+		// restart the socket mode
+		iMode = 0;
+		iResult = ioctlsocket(sock, FIONBIO, &iMode);
+		if (iResult != NO_ERROR)
+		{
+			printf("ioctlsocket failed with error: %ld\n", iResult);
+		}
+
+		fd_set Write, Err;
+		FD_ZERO(&Write);
+		FD_ZERO(&Err);
+		FD_SET(sock, &Write);
+		FD_SET(sock, &Err);
+
+		// check if the socket is ready
+		select(0, NULL, &Write, &Err, &Timeout);
+		if (FD_ISSET(sock, &Write))
+		{
+			return true;
+		}
+	}
 }
 
 void Client::clean()
 {
 	closesocket(sock);
 	WSACleanup();
+}
+
+std::string Client::RecieveMsg(bool wait_for_msg, bool&msg_recieved, double timeout)
+{
+	std::clock_t start = std::clock();
+	double duration = 0;
+	do
+	{
+		duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+		ZeroMemory(buf, 4096);
+		int   rc;
+		u_long nonblocking_enabled = TRUE;
+		ioctlsocket(sock, FIONBIO, &nonblocking_enabled);
+		errno = 0;
+		rc = recv(sock, buf, 4096, 0);
+		if (rc != NOERROR)
+		{
+			if (rc > 0)
+			{
+				msg_recieved = true;
+				std::string out(buf, 0, rc);
+				//for (int k = 0; k < out.length(); k++)
+				//{
+				//	bool oneenter = false;
+				//	if (out[k] == '\n')
+				//	{
+				//		if (oneenter)
+				//		{
+				//			out.erase(k);
+				//		}
+				//		oneenter = true;
+				//	}
+				//	if (out[k] == '\r')
+				//	{
+				//		out.erase(k);
+				//	}
+				//}
+				return out;
+				break;
+			}
+		}
+	} while (wait_for_msg&&duration < timeout);
+}
+
+bool Client::SendMsg(std::string msg)
+{
+	// Send the text
+	int sendResult;
+	sendResult = send(sock, msg.c_str(), msg.size() + 1, 0);
+	if (sendResult != SOCKET_ERROR)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	return false;
 }

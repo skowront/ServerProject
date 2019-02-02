@@ -24,17 +24,18 @@ public:
 
 	//custom contstuctors
 	Client(std::string, int);
-	void Run();
+	bool Run(double connectTimeout, bool unconditional);
 
-	std::string RecieveMsg(bool wait_for_msg,bool& msg_recieved,double timeout);//recommended to be in a while loop
-	bool SendMsg(std::string msg);
+	
 protected:
 	//help for publics
 	bool initialize_winsock();
 	bool create_socket();
-	bool connectToServer();
-	void handle();
+	bool connectToServer(double connectTimeout, bool unconditional);
 	void clean();
 
+public:
+	std::string RecieveMsg(bool wait_for_msg, bool& msg_recieved, double timeout);//recommended to be in a while loop
+	bool SendMsg(std::string msg);
 };
 
