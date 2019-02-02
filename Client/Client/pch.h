@@ -5,6 +5,7 @@
 #include <string>
 #include <conio.h>
 #include <iostream>
+#include <ctime>
 
 #include <fcntl.h> 
 #include <errno.h> 

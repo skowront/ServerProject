@@ -3,20 +3,37 @@
 
 Server::Server()
 {
+	ServerBase();
 }
 
 Server::~Server()
 {
+	if (dc_command1)
+	{
+		delete dc_command1;
+	}
+	if (dc_command2)
+	{
+		delete dc_command2;
+	}
+}
+
+void Server::ServerBase()
+{
+	dc_command1 = new char[strlen("\\dc\n")];
+	dc_command2 = new char[strlen("\\dc\r\n")];
+	strcpy(dc_command1, "\\dc\n");
+	strcpy(dc_command2, "\\dc\r\n");
 }
 
 Server::Server(int _base_port)
 {
+	ServerBase();
 	base_port = _base_port;
 }
 
 void Server::Run()
 {
-
 	if (!initialize_winsock())
 	{
 		return;
@@ -81,7 +98,7 @@ void Server::create_set()
 	// It's important that this socket is added for our server or else we won't 'hear' incoming
 	// connections 
 	
-	UserSocket us; us.fd_index = 0; us.id = 0; us.ip = "";
+	UserSocket* us = new UserSocket(0,nullptr,0);
 	clients.push_back(us);
 	FD_SET(listening_socket, &master);
 	 
@@ -117,9 +134,9 @@ void Server::handlingloop()
 		for (int i = 0; i < socketCount; i++)
 		{
 			// Makes things easy for us doing this assignment
-			SOCKET sock = copy.fd_array[i];
+			insock = copy.fd_array[i];
 			// Is it an inbound communication?
-			if (sock == listening_socket)
+			if (insock == listening_socket)
 			{
 				// Accept a new connection
 				SOCKET client = accept(listening_socket, nullptr, nullptr);
@@ -132,33 +149,34 @@ void Server::handlingloop()
 				else
 					wprintf(L"Client connected.\n");
 				// Add the new connection to the list of connected clients
-				UserSocket us; us.fd_index = i; us.id = clients[clients.size()-1].id + 1; us.ip = "";
+				UserSocket* us = new UserSocket(master.fd_count, nullptr, clients[clients.size() - 1]->id + 1);
 				clients.push_back(us);
 				FD_SET(client, &master);
 				//TODO: create copy of socket list or common structure to hold em
 				//print("connected at: " + std::to_string(i));
 
 				// Send a welcome message to the connected client
-				std::string welcomeMsg = "Welcome to the Awesome Chat Server!\r\n";
+				welcomeMsg = "Welcome to the Server!\r\n";
 				send(client, welcomeMsg.c_str(), welcomeMsg.size() + 1, 0);
 			}
 			else // It's an inbound message
 			{
 
-				char buf[4096];
+				
 				ZeroMemory(buf, 4096);
 
 				// Receive message
-				int bytesIn = recv(sock, buf, 4096, 0);
-				if (bytesIn <= 0)
+				int bytesIn = recv(insock, buf, 4096, 0);
+				if (bytesIn <= 0||strcmp(buf,dc_command1)==0|| strcmp(buf, dc_command2)==0)
 				{
 					// Drop the client
-					closesocket(sock);
-					FD_CLR(sock, &master);
+					closesocket(insock);
+					FD_CLR(insock, &master);
+					delete clients[i];
 					clients.erase(clients.begin()+i);
 					for (int j = i; j < clients.size(); j++)//must decrement indexes
 					{
-						clients[j].fd_index--;
+						clients[j]->fd_index--;
 					}
 					
 				}
@@ -181,19 +199,8 @@ void Server::handlingloop()
 
 
 					// Send message to other clients, and definiately NOT the listening socket
-
-					for (int i = 0; i < master.fd_count; i++)
-					{
-						SOCKET outSock = master.fd_array[i];
-						if (outSock != listening_socket && outSock != sock)
-						{
-							std::ostringstream ss;
-							ss << "SOCKET #" << sock << ": " << buf << "\r\n";
-							std::string strOut = ss.str();
-
-							send(outSock, strOut.c_str(), strOut.size() + 1, 0);
-						}
-					}
+					OnDataRecieved();
+					
 				}
 			}
 		}
@@ -229,3 +236,24 @@ void Server::clean()
 
 	system("pause");
 }
+
+//the recieved message is in buf
+void Server::OnDataRecieved()
+{
+	ZeroMemory(bufout, 4096);
+	for (int i = 0; i < master.fd_count; i++)
+	{
+		SOCKET outSock = master.fd_array[i];
+		if (outSock != listening_socket)
+		{
+			std::ostringstream ss;
+			memcpy(bufout, buf, sizeof(buf));
+			ss << "SOCKET #" << insock << ": " << bufout << "\r\n";
+			std::string strOut = ss.str();
+
+			send(outSock, strOut.c_str(), strOut.size() + 1, 0);
+		}
+	}
+}
+
+
