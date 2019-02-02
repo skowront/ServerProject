@@ -8,6 +8,8 @@ int main()
 		client->Run();
 		bool once = true;
 		bool dosend = false;
+
+		//FOREVER
 		while (true)
 		{
 			std::string userInput;
@@ -26,12 +28,20 @@ int main()
 
 			if (userInput.size() > 0)		// Make sure the user has typed in something
 			{
-				
+				if (userInput=="\\dc")
+				{
+					break;
+				}
+				//SEND
 				dosend=!(client->SendMsg(userInput));
 				dosend = false;
 			}
 			bool brcv = false;
+
+			//RECIEVE
 			std::string rcv = client->RecieveMsg(false, brcv, 0);
+
+
 			if (brcv)
 			{
 				print(rcv);

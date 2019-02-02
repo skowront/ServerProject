@@ -8,14 +8,14 @@ Server::Server()
 
 Server::~Server()
 {
-	if (dc_command1)
+	/*if (dc_command1)
 	{
-		delete dc_command1;
+		free(dc_command1);
 	}
 	if (dc_command2)
 	{
 		delete dc_command2;
-	}
+	}*/
 }
 
 void Server::ServerBase()
@@ -187,7 +187,7 @@ void Server::handlingloop()
 					{
 						// Is the command quit? 
 						std::string cmd = std::string(buf, bytesIn);
-						if (cmd == "\\quit")
+						if (strcmp(cmd.c_str(),"\\quit")==0)
 						{
 							running = false;
 							break;
