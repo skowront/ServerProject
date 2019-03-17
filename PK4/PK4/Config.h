@@ -12,13 +12,16 @@ public:
 	std::string config_file_path;
 	std::string names_file_path;
 	std::string	surnames_file_path;
+	std::string clubs_file_path;
 	std::vector <std::string> names_vec;
 	std::vector <std::string> surnames_vec;
+	std::vector <std::string> clubs_vec;
 	Locale*locale=nullptr;
 private:
 	void switchOnLine(const std::string &line);
 	void loadNames(const std::string& filename);
 	void loadSurnames(const std::string& filename);
+	void loadClubs(const std::string& filename);
 };
 
 

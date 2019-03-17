@@ -69,6 +69,11 @@ void Config::switchOnLine(const std::string & line)
 		this->localization_file_path = part2;
 		return;
 	}
+	if (part1 == "#clubsfile")
+	{
+		this->clubs_file_path = part2;
+		return;
+	}
 }
 
 void Config::loadNames(const std::string & filename)
@@ -104,6 +109,38 @@ void Config::loadSurnames(const std::string & filename)
 		while (std::getline(CfgFile, line))
 		{
 			this->surnames_vec.push_back(line);
+		}
+		CfgFile.close();
+	}
+}
+
+void Config::loadClubs(const std::string & filename)
+{
+	std::fstream CfgFile(filename);
+	if (!CfgFile.good())
+	{
+		correct = false;
+		throw ConfigSurnamesError;
+	}
+	else
+	{
+		std::string line;//TODO
+		while (std::getline(CfgFile, line))
+		{
+			Club *club = new Club();
+			std::stringstream ss(line);
+			std::string part1;
+			std::string part2;
+			std::string part3;
+			ss >> part1;
+			if (part1 == "#club")
+			{
+				
+				while (ss)
+				{
+
+				}
+			}
 		}
 		CfgFile.close();
 	}

@@ -8,6 +8,7 @@ Game::Game()
 Game::Game(const std::string& configPath)
 {
 	Setup(configPath);
+	Run();
 }
 
 Game::~Game()
@@ -22,6 +23,16 @@ void Game::Setup(const std::string &configPath)
 	catch (...) {
 		TS::log("Error ConfigError");
 		this->fine = false;
+	}
+}
+
+void Game::Run()
+{
+	while (true)
+	{
+		//Input section
+		
+		//Daily events
 	}
 }
 

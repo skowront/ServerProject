@@ -13,60 +13,90 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Misc">
+      <UniqueIdentifier>{14b0329e-903c-4f60-a755-b9514fb0c8e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Globals">
+      <UniqueIdentifier>{4a6ce779-c60c-4c66-8ae4-a2b7336f18d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{f990c45a-81b6-4291-adcf-9bc40fc74798}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Misc">
+      <UniqueIdentifier>{3fd282c1-4663-40d1-82eb-f63ca657c8c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Globals">
+      <UniqueIdentifier>{78219ce9-84b0-4507-8391-c1dd85d9777f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{96ec6aff-cff1-474e-a3e1-eb059d4bc680}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Main">
+      <UniqueIdentifier>{fcb1e963-21fa-4625-aa70-5b4d2e191eb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Main">
+      <UniqueIdentifier>{b2386732-b91e-44d3-9157-a0edc7c55958}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Person.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Source Files\Misc</Filter>
     </ClCompile>
     <ClCompile Include="Config.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Globals</Filter>
     </ClCompile>
     <ClCompile Include="Locale.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Globals</Filter>
     </ClCompile>
-    <ClCompile Include="Utility.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Person.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Club.cpp">
+      <Filter>Source Files\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Person.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PreDef.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="BOOL_template.h">
+      <Filter>Header Files\Misc</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="BOOL_template.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="PreDef.h">
+      <Filter>Header Files\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files\Globals</Filter>
     </ClInclude>
     <ClInclude Include="Locale.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Globals</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Person.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Club.h">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
