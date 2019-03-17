@@ -142,19 +142,19 @@ void Server::handlingloop()
 				// Accept a new connection
 				SOCKET client = accept(listening_socket, nullptr, nullptr);
 				if (client == INVALID_SOCKET) {
-					wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
+					print("accept failed with error:"+ WSAGetLastError() +'\n');
 					closesocket(listening_socket);
 					WSACleanup();
 					return;
 				}
 				else
-					wprintf(L"Client connected.\n");
+					print("Client connected");
 				// Add the new connection to the list of connected clients
 				UserSocket* us = new UserSocket(master.fd_count, nullptr, clients[clients.size() - 1]->id + 1);
 				clients.push_back(us);
 				FD_SET(client, &master);
 				//TODO: create copy of socket list or common structure to hold em
-				//print("connected at: " + std::to_string(i));
+				print("connected at: " + std::to_string(i));
 
 				// Send a welcome message to the connected client
 				welcomeMsg = "Welcome to the Server!\r\n";
