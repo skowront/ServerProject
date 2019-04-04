@@ -49,6 +49,7 @@ public:
 	void Run();
 
 	virtual void OnDataRecieved();
+	virtual void OnTick();
 protected:
 	//helping functions for publics
 	bool initialize_winsock();

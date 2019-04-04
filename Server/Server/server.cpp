@@ -201,8 +201,8 @@ void Server::handlingloop()
 
 					// Send message to other clients, and definiately NOT the listening socket
 					OnDataRecieved();
-					
 				}
+				OnTick();
 			}
 		}
 	}
@@ -257,6 +257,11 @@ void Server::OnDataRecieved()
 			send(outSock, strOut.c_str(), strOut.size() + 1, 0);
 		}
 	}
+}
+
+void Server::OnTick()
+{
+
 }
 
 
