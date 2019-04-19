@@ -24,7 +24,6 @@ void Server::ServerBase()
 	dc_command2 = (char*)malloc(sizeof(char)*sizeof("\\dc\r\n"));//alloc
 	strcpy(dc_command1, "\\dc\n");
 	strcpy(dc_command2, "\\dc\r\n");
-	
 }
 
 Server::Server(int _base_port)
@@ -129,7 +128,14 @@ void Server::handlingloop()
 
 		// See who's talking to us
 
-		int socketCount = select(0, &copy, nullptr, nullptr, nullptr);
+		TIMEVAL interval;
+		interval.tv_sec = 0;
+		int socketCount = select(0, &copy, nullptr, nullptr, &interval);
+		std::string line;
+		if (_kbhit())
+		{
+			std::getline(std::cin, line);
+		}
 		
 		// Loop through all the current connections / potential connect
 		for (int i = 0; i < socketCount; i++)
